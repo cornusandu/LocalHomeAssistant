@@ -1,0 +1,21 @@
+@startuml "LocalHomeAssistant"
+!theme toy
+!option handwritten false
+skinparam shadowing false
+
+package "LocalHomeAssistant" {
+
+    class Server {
+        + Start()
+        + Restart()
+        + Terminate()
+        + Status()
+        
+    }
+        
+    LanguageServer --> DocumentManager : uses
+
+    note "Will query a json file which contains the feature name and a boolean regarding its status." as ServerStatusNote
+    Server.Status .. ServerStatusNote
+}
+@enduml

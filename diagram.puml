@@ -1,0 +1,142 @@
+@startuml "LocalHomeAssistant"
+!theme toy
+!option handwritten false
+skinparam shadowing false
+
+package "LocalHomeAssistant" {
+
+    class Server {
+        + Start()
+        + Restart()
+        + Terminate()
+        + Status()
+        
+    }
+        
+
+    class DocumentManager {
+        - documents: Dictionary<Uri, TextDocument>
+        + GetDocument(uri: Uri): TextDocument
+        + UpdateDocument(uri: Uri, content: string)
+        + AddDocument(uri: Uri, content: string)
+        + RemoveDocument(uri: Uri)
+    }
+
+    class TextDocument {
+        - uri: Uri
+        - content: string
+        - version: int
+        + GetContent(): string
+        + GetLines(): string[]
+        + GetVersion(): int
+    }
+
+    class Tokenizer {
+        + Tokenize(sourceCode: string): List<Token>
+        - patterns: List<Regex>
+        - tokenTypes: Dictionary<string, TokenType>
+    }
+
+    class Token {
+        + Type: TokenType
+        + Value: string
+        + StartPosition: int
+        + Length: int
+        + Line: int
+        + Column: int
+    }
+
+    enum TokenType {
+        KEYWORD
+        IDENTIFIER
+        OPERATOR
+        STRING_LITERAL
+        NUMBER_LITERAL
+        COMMENT
+        WHITESPACE
+    }
+
+    class Parser {
+        + Parse(tokens: List<Token>): AbstractSyntaxTree
+        - currentTokenIndex: int
+        - tokens: List<Token>
+        + Consume(expectedType: TokenType): Token
+        - ParseStatement(): Node
+        - ParseExpression(): Node
+    }
+
+    class AbstractSyntaxTree {
+        + Root: Node
+    }
+
+    abstract class Node {
+        + Range: Range
+    }
+
+    class Diagnostic {
+        + Range: Range
+        + Message: string
+        + Severity: DiagnosticSeverity
+    }
+
+    class Analyser {
+        + Analyse(ast: AbstractSyntaxTree): List<Diagnostic>
+        - symbolTable: SymbolTable
+    }
+
+    class SymbolTable {
+        + AddSymbol(name: string, type: SymbolType, location: Location)
+        + ResolveSymbol(name: string): Symbol
+    }
+
+    LanguageServer --> DocumentManager : uses
+    LanguageServer --> Parser : uses
+    LanguageServer --> Analyser : uses
+    DocumentManager --> TextDocument : manages
+    Parser --> Tokenizer : uses
+    Parser --> AbstractSyntaxTree : creates
+    Analyser --> AbstractSyntaxTree : analyses
+    Analyser --> SymbolTable : uses
+    Tokenizer ..> Token : creates
+    Token ..> TokenType : has
+
+    note "Will query a json file which contains the feature name and a boolean regarding its status." as ServerStatusNote
+    Server.Status .. ServerStatusNote
+
+    note "Builds a structured representation of the code." as N2
+    Parser .. N2
+
+    note "Checks for semantic errors and builds symbol table." as N3
+    Analyser .. N3
+}
+
+package "LSP Types (External)" {
+    class InitializeParams
+    class DidChangeTextDocumentParams
+    class CompletionParams
+    class CompletionList
+    class HoverParams
+    class Hover
+    class DefinitionParams
+    class Location
+    class SemanticTokensParams
+    class SemanticTokens
+    class DiagnosticSeverity
+    class Range
+    class Uri
+}
+
+LanguageServer ..> InitializeParams
+LanguageServer ..> DidChangeTextDocumentParams
+LanguageServer ..> CompletionParams
+LanguageServer ..> CompletionList
+LanguageServer ..> HoverParams
+LanguageServer ..> Hover
+LanguageServer ..> DefinitionParams
+LanguageServer ..> Location
+LanguageServer ..> SemanticTokensParams
+LanguageServer ..> SemanticTokens
+Diagnostic ..> DiagnosticSeverity
+Node ..> Range
+TextDocument ..> Uri
+@enduml
