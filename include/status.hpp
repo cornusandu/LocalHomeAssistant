@@ -1,3 +1,5 @@
+#pragma once
+
 enum class ServerStatus {
     Inactive = 1,
     Running = 2,

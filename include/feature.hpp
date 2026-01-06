@@ -1,3 +1,5 @@
+#pragma once
+
 #include "status.hpp"
 
 struct Feature {
