@@ -4,8 +4,16 @@
 #include "feature.hpp"
 
 #include <vector>
+#include <string>
 
-struct HomeAssistantServer {
-    ServerStatus status = ServerStatus::Inactive;
-    std::vector<Feature> availableFeatures;
+class HomeAssistantServer {
+    public:
+        ServerStatus getStatus();
+        void start(std::string args[]);
+        bool restart();
+        void terminate();
+        void setStatus(ServerStatus status);
+    private:
+        ServerStatus status = ServerStatus::Inactive;
+        std::vector<Feature> availableFeatures;
 };
