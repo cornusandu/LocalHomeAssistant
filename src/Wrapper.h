@@ -114,7 +114,9 @@ public:
         std::vector<std::string> nativeArgs;
         for each (String^ s in args)
         {
-            nativeArgs.push_back(msclr::marshal_cppstd::string(s));
+            nativeArgs.push_back(
+                msclr::interop::marshal_as<std::string>(s)
+            );
         }
 
         native->start(nativeArgs.data());
